@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self Quiz — FlagCheck</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header>
+    <a href="index.html" class="logo">🚩 FlagCheck</a>
+    <nav>
+      <a href="self-quiz.html">Self Quiz</a>
+      <a href="partner-quiz.html">Partner Quiz</a>
+      <a href="compatibility.html">Compatibility</a>
+    </nav>
+  </header>
+
+  <!-- QUIZ SECTION -->
+  <div class="quiz-container" id="quiz-section">
+    <div class="quiz-header">
+      <span class="eyebrow">Self Check</span>
+      <h1>Are <em style="font-style:italic;color:var(--red)">you</em> a red flag?</h1>
+      <p>15 honest questions about how you show up in relationships.</p>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-label">Question 1 of 15</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-num" id="question-num">QUESTION 01</div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options-list"></div>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div class="result-container hidden" id="result-section">
+    <div class="result-badge" id="result-emoji"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-subtitle" id="result-subtitle"></div>
+    <div class="result-desc" id="result-desc"></div>
+
+    <div class="score-bars">
+      <div class="score-row">
+        <span class="score-label">💚 Healthy</span>
+        <div class="score-track"><div class="score-fill fill-green" id="bar-g" style="width:0%"></div></div>
+        <span class="score-count" id="cnt-g">0</span>
+      </div>
+      <div class="score-row">
+        <span class="score-label">⚖️ Balanced</span>
+        <div class="score-track"><div class="score-fill fill-yellow" id="bar-b" style="width:0%"></div></div>
+        <span class="score-count" id="cnt-b">0</span>
+      </div>
+      <div class="score-row">
+        <span class="score-label">🚩 Avoidant</span>
+        <div class="score-track"><div class="score-fill fill-red" id="bar-a" style="width:0%"></div></div>
+        <span class="score-count" id="cnt-a">0</span>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="retakeQuiz()">Retake Quiz</button>
+      <a href="partner-quiz.html" class="btn btn-secondary">Check Your Partner</a>
+      <a href="compatibility.html" class="btn btn-ghost">Compatibility Test</a>
+    </div>
+  </div>
+
+  <footer><p>Made with 💚 and a little 🚩 energy</p></footer>
+
+  <script src="js/quiz-data.js"></script>
+  <script>
+    let currentQ = 0;
+    let answers = [];
+    let selectedOpt = null;
+
+    function renderQuestion() {
+      const q = FLAG_QUESTIONS[currentQ];
+      const total = FLAG_QUESTIONS.length;
+      const pct = Math.round((currentQ / total) * 100);
+
+      document.getElementById("q-label").textContent = `Question ${currentQ + 1} of ${total}`;
+      document.getElementById("q-pct").textContent = pct + "%";
+      document.getElementById("progress-fill").style.width = pct + "%";
+      document.getElementById("question-num").textContent = "QUESTION " + String(currentQ + 1).padStart(2, "0");
+      document.getElementById("question-text").textContent = q.q;
+
+      // Reset
+      selectedOpt = answers[currentQ] !== undefined ? answers[currentQ] : null;
+
+      const optList = document.getElementById("options-list");
+      optList.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn" + (selectedOpt === i ? " selected" : "");
+        btn.innerHTML = `<span class="option-letter">${["A","B","C","D"][i]}</span>${opt.text}`;
+        btn.onclick = () => selectOption(i);
+        optList.appendChild(btn);
+      });
+
+      document.getElementById("btn-prev").style.visibility = currentQ === 0 ? "hidden" : "visible";
+      document.getElementById("btn-next").disabled = selectedOpt === null;
+      document.getElementById("btn-next").textContent = currentQ === total - 1 ? "See My Result ✨" : "Next →";
+
+      // Animate card
+      const card = document.getElementById("question-card");
+      card.style.animation = "none";
+      card.offsetHeight;
+      card.style.animation = "slideIn 0.3s ease";
+    }
+
+    function selectOption(idx) {
+      selectedOpt = idx;
+      answers[currentQ] = idx;
+      document.querySelectorAll(".option-btn").forEach((b, i) => {
+        b.classList.toggle("selected", i === idx);
+      });
+      document.getElementById("btn-next").disabled = false;
+    }
+
+    function nextQuestion() {
+      if (selectedOpt === null) return;
+      if (currentQ < FLAG_QUESTIONS.length - 1) {
+        currentQ++;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQ > 0) { currentQ--; renderQuestion(); }
+    }
+
+    function showResult() {
+      const formattedAnswers = answers.map((optIdx, qIdx) => ({ qIdx, optIdx }));
+      const scores = scoreAnswers(formattedAnswers);
+      const result = getResult(scores);
+
+      document.getElementById("result-emoji").textContent = result.emoji;
+      document.getElementById("result-title").textContent = result.title;
+      document.getElementById("result-subtitle").textContent = `Based on your answers across 15 questions`;
+      document.getElementById("result-desc").textContent = result.desc;
+
+      const total = scores.total;
+      document.getElementById("bar-g").style.width = (scores.G / total * 100) + "%";
+      document.getElementById("bar-b").style.width = (scores.B / total * 100) + "%";
+      document.getElementById("bar-a").style.width = (scores.A / total * 100) + "%";
+      document.getElementById("cnt-g").textContent = scores.G;
+      document.getElementById("cnt-b").textContent = scores.B;
+      document.getElementById("cnt-a").textContent = scores.A;
+
+      document.getElementById("quiz-section").classList.add("hidden");
+      document.getElementById("result-section").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+
+    function retakeQuiz() {
+      currentQ = 0;
+      answers = [];
+      selectedOpt = null;
+      document.getElementById("quiz-section").classList.remove("hidden");
+      document.getElementById("result-section").classList.add("hidden");
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>

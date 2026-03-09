@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partner Quiz — FlagCheck</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header>
+    <a href="index.html" class="logo">🚩 FlagCheck</a>
+    <nav>
+      <a href="self-quiz.html">Self Quiz</a>
+      <a href="partner-quiz.html">Partner Quiz</a>
+      <a href="compatibility.html">Compatibility</a>
+    </nav>
+  </header>
+
+  <!-- QUIZ SECTION -->
+  <div class="quiz-container" id="quiz-section">
+    <div class="quiz-header">
+      <span class="eyebrow">Partner Check</span>
+      <h1>Is your <em style="font-style:italic;color:var(--red)">partner</em> a red flag?</h1>
+      <p>Answer these 15 questions based on how your partner typically behaves.</p>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-label">Question 1 of 15</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-num" id="question-num">QUESTION 01</div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options-list"></div>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div class="result-container hidden" id="result-section">
+    <div class="result-badge" id="result-emoji"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-subtitle" id="result-subtitle"></div>
+    <div class="result-desc" id="result-desc"></div>
+
+    <div class="score-bars">
+      <div class="score-row">
+        <span class="score-label">💚 Healthy</span>
+        <div class="score-track"><div class="score-fill fill-green" id="bar-g" style="width:0%"></div></div>
+        <span class="score-count" id="cnt-g">0</span>
+      </div>
+      <div class="score-row">
+        <span class="score-label">⚖️ Balanced</span>
+        <div class="score-track"><div class="score-fill fill-yellow" id="bar-b" style="width:0%"></div></div>
+        <span class="score-count" id="cnt-b">0</span>
+      </div>
+      <div class="score-row">
+        <span class="score-label">🚩 Avoidant</span>
+        <div class="score-track"><div class="score-fill fill-red" id="bar-a" style="width:0%"></div></div>
+        <span class="score-count" id="cnt-a">0</span>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="retakeQuiz()">Retake Quiz</button>
+      <a href="self-quiz.html" class="btn btn-secondary">Check Yourself</a>
+      <a href="compatibility.html" class="btn btn-ghost">Compatibility Test</a>
+    </div>
+  </div>
+
+  <footer><p>Made with 💚 and a little 🚩 energy</p></footer>
+
+  <script src="js/quiz-data.js"></script>
+  <script>
+    // Rephrase questions for partner perspective
+    const PARTNER_QUESTIONS = [
+      {
+        q: "When you and your partner disagree about something small (like where to eat), they usually…",
+        options: [
+          { text: "Try to convince me of their choice", cat: "A" },
+          { text: "Are fine going with my idea", cat: "G" },
+          { text: "Discuss both options for a bit", cat: "G" },
+          { text: "Usually say \"you decide\"", cat: "B" }
+        ]
+      },
+      {
+        q: "When your partner hasn't heard from you for a few hours, they…",
+        options: [
+          { text: "Assume you're busy", cat: "G" },
+          { text: "Send another message later", cat: "B" },
+          { text: "Check if you're active somewhere else", cat: "B" },
+          { text: "Wait until you reply", cat: "G" }
+        ]
+      },
+      {
+        q: "When you're out with friends, your partner texts you and…",
+        options: [
+          { text: "Expects a quick reply", cat: "A" },
+          { text: "Is fine waiting for a moment", cat: "G" },
+          { text: "Doesn't mind if you respond later", cat: "G" },
+          { text: "Sometimes forgets they messaged you", cat: "B" }
+        ]
+      },
+      {
+        q: "When you post a photo and get lots of attention online, your partner…",
+        options: [
+          { text: "Likes the post and moves on", cat: "G" },
+          { text: "Hypes you up in the comments", cat: "G" },
+          { text: "Mentions who's been interacting with it", cat: "A" },
+          { text: "Teases you about your \"fans\"", cat: "B" }
+        ]
+      },
+      {
+        q: "When you say you want a weekend with your friends, your partner…",
+        options: [
+          { text: "Says \"sounds fun, enjoy!\"", cat: "G" },
+          { text: "Asks what you're planning", cat: "B" },
+          { text: "Jokes that you're abandoning them", cat: "A" },
+          { text: "Suggests you meet after", cat: "G" }
+        ]
+      },
+      {
+        q: "When your partner accidentally forgets to reply to you, they…",
+        options: [
+          { text: "Apologize when they see it", cat: "G" },
+          { text: "Continue the conversation normally", cat: "B" },
+          { text: "Mention they got busy", cat: "B" },
+          { text: "Reply later without much mention", cat: "B" }
+        ]
+      },
+      {
+        q: "When you seem quieter than usual, your partner…",
+        options: [
+          { text: "Asks if everything is okay", cat: "G" },
+          { text: "Gives you some space first", cat: "G" },
+          { text: "Waits to see if you bring it up", cat: "B" },
+          { text: "Tries to lighten the mood", cat: "B" }
+        ]
+      },
+      {
+        q: "When someone flirts with you while you're both out, your partner…",
+        options: [
+          { text: "Doesn't think much about it", cat: "G" },
+          { text: "Finds it a bit funny", cat: "B" },
+          { text: "Notices but stays quiet", cat: "A" },
+          { text: "Teases you about it later", cat: "B" }
+        ]
+      },
+      {
+        q: "When your partner is annoyed about something small you did, they…",
+        options: [
+          { text: "Mention it casually", cat: "G" },
+          { text: "Let it go after a while", cat: "B" },
+          { text: "Bring it up later in conversation", cat: "G" },
+          { text: "Make a small joke about it", cat: "B" }
+        ]
+      },
+      {
+        q: "When you forget something your partner told you earlier, they…",
+        options: [
+          { text: "Remind you", cat: "G" },
+          { text: "Laugh about it", cat: "G" },
+          { text: "Repeat it again", cat: "B" },
+          { text: "Say \"I told you already\"", cat: "A" }
+        ]
+      },
+      {
+        q: "When you're very busy with work/studies for a few days, your partner…",
+        options: [
+          { text: "Gives you space", cat: "G" },
+          { text: "Sends supportive messages", cat: "G" },
+          { text: "Checks in occasionally", cat: "B" },
+          { text: "Waits for you to reach out", cat: "B" }
+        ]
+      },
+      {
+        q: "When your partner sees you online but you haven't replied yet, they…",
+        options: [
+          { text: "Assume you'll reply later", cat: "G" },
+          { text: "Don't really think about it", cat: "G" },
+          { text: "Notice but ignore it", cat: "B" },
+          { text: "Send another message", cat: "A" }
+        ]
+      },
+      {
+        q: "When you achieve something big, your partner…",
+        options: [
+          { text: "Celebrates it with you", cat: "G" },
+          { text: "Congratulates you warmly", cat: "G" },
+          { text: "Shares it with others proudly", cat: "G" },
+          { text: "Teases you about becoming famous", cat: "B" }
+        ]
+      },
+      {
+        q: "When your partner needs space, they…",
+        options: [
+          { text: "Tell you directly", cat: "G" },
+          { text: "Say they're a bit busy", cat: "B" },
+          { text: "Go quiet without explanation", cat: "A" },
+          { text: "Take some time to themselves", cat: "B" }
+        ]
+      },
+      {
+        q: "When you're upset about something, your partner…",
+        options: [
+          { text: "Listens to you", cat: "G" },
+          { text: "Asks what happened", cat: "G" },
+          { text: "Tries to cheer you up immediately", cat: "B" },
+          { text: "Sits with you quietly", cat: "G" }
+        ]
+      }
+    ];
+
+    let currentQ = 0;
+    let answers = [];
+    let selectedOpt = null;
+
+    function renderQuestion() {
+      const q = PARTNER_QUESTIONS[currentQ];
+      const total = PARTNER_QUESTIONS.length;
+      const pct = Math.round((currentQ / total) * 100);
+
+      document.getElementById("q-label").textContent = `Question ${currentQ + 1} of ${total}`;
+      document.getElementById("q-pct").textContent = pct + "%";
+      document.getElementById("progress-fill").style.width = pct + "%";
+      document.getElementById("question-num").textContent = "QUESTION " + String(currentQ + 1).padStart(2, "0");
+      document.getElementById("question-text").textContent = q.q;
+
+      selectedOpt = answers[currentQ] !== undefined ? answers[currentQ] : null;
+
+      const optList = document.getElementById("options-list");
+      optList.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn" + (selectedOpt === i ? " selected" : "");
+        btn.innerHTML = `<span class="option-letter">${["A","B","C","D"][i]}</span>${opt.text}`;
+        btn.onclick = () => selectOption(i);
+        optList.appendChild(btn);
+      });
+
+      document.getElementById("btn-prev").style.visibility = currentQ === 0 ? "hidden" : "visible";
+      document.getElementById("btn-next").disabled = selectedOpt === null;
+      document.getElementById("btn-next").textContent = currentQ === total - 1 ? "See Result ✨" : "Next →";
+
+      const card = document.getElementById("question-card");
+      card.style.animation = "none";
+      card.offsetHeight;
+      card.style.animation = "slideIn 0.3s ease";
+    }
+
+    function selectOption(idx) {
+      selectedOpt = idx;
+      answers[currentQ] = idx;
+      document.querySelectorAll(".option-btn").forEach((b, i) => {
+        b.classList.toggle("selected", i === idx);
+      });
+      document.getElementById("btn-next").disabled = false;
+    }
+
+    function nextQuestion() {
+      if (selectedOpt === null) return;
+      if (currentQ < PARTNER_QUESTIONS.length - 1) {
+        currentQ++;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQ > 0) { currentQ--; renderQuestion(); }
+    }
+
+    function showResult() {
+      const formattedAnswers = answers.map((optIdx, qIdx) => {
+        const cat = PARTNER_QUESTIONS[qIdx].options[optIdx].cat;
+        return { qIdx, optIdx, cat };
+      });
+
+      let G = 0, B = 0, A = 0;
+      formattedAnswers.forEach(({ cat }) => {
+        if (cat === "G") G++;
+        else if (cat === "B") B++;
+        else A++;
+      });
+
+      const scores = { G, B, A, total: answers.length };
+      const result = getResult(scores);
+
+      // Change wording slightly for partner
+      const partnerResult = {
+        ...result,
+        desc: result.desc.replace(/You bring/g, "Your partner brings").replace(/^You /g, "Your partner ").replace(/your relationships/g, "their relationships").replace(/your partner/g, "them")
+      };
+
+      document.getElementById("result-emoji").textContent = result.emoji;
+      document.getElementById("result-title").textContent = "Your Partner: " + result.title;
+      document.getElementById("result-subtitle").textContent = `Based on your observations across 15 questions`;
+      document.getElementById("result-desc").textContent = result.desc;
+
+      const total = scores.total;
+      document.getElementById("bar-g").style.width = (G / total * 100) + "%";
+      document.getElementById("bar-b").style.width = (B / total * 100) + "%";
+      document.getElementById("bar-a").style.width = (A / total * 100) + "%";
+      document.getElementById("cnt-g").textContent = G;
+      document.getElementById("cnt-b").textContent = B;
+      document.getElementById("cnt-a").textContent = A;
+
+      document.getElementById("quiz-section").classList.add("hidden");
+      document.getElementById("result-section").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+
+    function retakeQuiz() {
+      currentQ = 0;
+      answers = [];
+      selectedOpt = null;
+      document.getElementById("quiz-section").classList.remove("hidden");
+      document.getElementById("result-section").classList.add("hidden");
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>

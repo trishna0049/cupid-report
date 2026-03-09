@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compatibility — FlagCheck</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header>
+    <a href="index.html" class="logo">🚩 FlagCheck</a>
+    <nav>
+      <a href="self-quiz.html">Self Quiz</a>
+      <a href="partner-quiz.html">Partner Quiz</a>
+      <a href="compatibility.html">Compatibility</a>
+    </nav>
+  </header>
+
+  <!-- INTRO SCREEN -->
+  <div class="quiz-container" id="intro-section">
+    <div class="quiz-header">
+      <span class="eyebrow">Compatibility</span>
+      <h1>How well do you <em style="font-style:italic;color:var(--green)">match</em>?</h1>
+      <p>Both people answer the same lifestyle questions. We compare your answers to calculate compatibility.</p>
+    </div>
+    <div style="display:flex;gap:20px;margin-bottom:32px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;background:var(--white);border-radius:var(--radius);padding:24px;border:1px solid var(--border)">
+        <div style="font-size:1.5rem;margin-bottom:8px">👤</div>
+        <strong>Person A</strong>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:4px">Answers questions about their own preferences and lifestyle.</p>
+      </div>
+      <div style="flex:1;min-width:220px;background:var(--white);border-radius:var(--radius);padding:24px;border:1px solid var(--border)">
+        <div style="font-size:1.5rem;margin-bottom:8px">👥</div>
+        <strong>Person B</strong>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:4px">Answers the same questions. We then compare how aligned you are.</p>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-large" onclick="startCompat()">Start Compatibility Test</button>
+  </div>
+
+  <!-- PERSON A QUIZ -->
+  <div class="quiz-container hidden" id="person-a-section">
+    <div class="quiz-header">
+      <span class="eyebrow" style="background:#eef6ff;color:#2563eb">Person A</span>
+      <h1>Your <em style="font-style:italic;color:#2563eb">preferences</em></h1>
+      <p>Answer honestly — no right or wrong answers here.</p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="a-q-label">Question 1 of 17</span>
+        <span id="a-q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="a-progress-fill" style="width:0%;background:linear-gradient(90deg,#2563eb,#60a5fa)"></div></div>
+    </div>
+    <div class="question-card" id="a-question-card">
+      <div class="question-num" id="a-question-num">QUESTION 01</div>
+      <div class="question-text" id="a-question-text"></div>
+      <div class="options" id="a-options-list"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="a-btn-prev" onclick="prevA()" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary" id="a-btn-next" onclick="nextA()" disabled style="background:#2563eb">Next →</button>
+    </div>
+  </div>
+
+  <!-- PERSON B QUIZ -->
+  <div class="quiz-container hidden" id="person-b-section">
+    <div class="quiz-header">
+      <span class="eyebrow" style="background:var(--red-soft);color:var(--red)">Person B</span>
+      <h1>Their <em style="font-style:italic;color:var(--red)">preferences</em></h1>
+      <p>Person B — your turn! Answer for yourself.</p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="b-q-label">Question 1 of 17</span>
+        <span id="b-q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="b-progress-fill" style="width:0%;background:linear-gradient(90deg,var(--red),#f87171)"></div></div>
+    </div>
+    <div class="question-card" id="b-question-card">
+      <div class="question-num" id="b-question-num">QUESTION 01</div>
+      <div class="question-text" id="b-question-text"></div>
+      <div class="options" id="b-options-list"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="b-btn-prev" onclick="prevB()" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary" id="b-btn-next" onclick="nextB()" disabled>See Compatibility ✨</button>
+    </div>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div class="result-container hidden" id="compat-result-section">
+    <div class="compat-result" style="background:var(--white);border-radius:var(--radius);padding:48px 32px;border:1px solid var(--border);box-shadow:var(--shadow)">
+      <div class="compat-emoji" id="compat-emoji"></div>
+      <div class="compat-score" id="compat-score"></div>
+      <div class="result-title" id="compat-title" style="margin-bottom:8px"></div>
+      <div class="result-subtitle" id="compat-subtitle" style="color:var(--muted);margin-bottom:28px"></div>
+      <div class="result-desc" id="compat-desc" style="text-align:left;margin-bottom:24px"></div>
+
+      <div class="score-bars" style="margin-bottom:32px">
+        <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:16px">Question Breakdown</h3>
+        <div class="score-row">
+          <span class="score-label">🎯 Exact</span>
+          <div class="score-track"><div class="score-fill" id="bar-exact" style="width:0%;background:#2563eb"></div></div>
+          <span class="score-count" id="cnt-exact">0</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">🤝 Close</span>
+          <div class="score-track"><div class="score-fill" id="bar-close" style="width:0%;background:var(--green)"></div></div>
+          <span class="score-count" id="cnt-close">0</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">↔️ Different</span>
+          <div class="score-track"><div class="score-fill" id="bar-diff" style="width:0%;background:var(--red)"></div></div>
+          <span class="score-count" id="cnt-diff">0</span>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="retakeCompat()">Try Again</button>
+        <a href="self-quiz.html" class="btn btn-secondary">Self Check</a>
+        <a href="index.html" class="btn btn-ghost">Home</a>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>Made with 💚 and a little 🚩 energy</p></footer>
+
+  <script>
+    const COMPAT_QUESTIONS = [
+      { q: "When going out socially, you prefer…", options: ["Large gatherings or parties", "Small groups of friends", "One-on-one hangouts", "Staying in most of the time"] },
+      { q: "An ideal date for you is…", options: ["Lunch/dinner with deep conversations", "A drive with music, stopping somewhere chill", "Doing an activity together (sports, games, exploring)", "Staying in with movies or cooking together"] },
+      { q: "Your ideal weekend looks like…", options: ["Going out and doing something exciting", "Meeting friends and socializing", "A mix of going out and relaxing", "Mostly relaxing at home"] },
+      { q: "When traveling, you prefer…", options: ["Planning everything in advance", "Planning the main things but leaving space", "Deciding as you go", "Completely spontaneous trips"] },
+      { q: "Your texting style is usually…", options: ["Lots of messages throughout the day", "A few meaningful conversations", "Mostly memes/reels and short texts", "Not much texting"] },
+      { q: "When listening to music with someone…", options: ["Love sharing playlists and discussing songs", "Enjoy discovering new music together", "Mostly stick to my favorites", "Don't think much about it"] },
+      { q: "Your ideal vacation is…", options: ["Exploring a new city", "Nature or mountains", "Beaches and relaxing", "Staying somewhere cozy and quiet"] },
+      { q: "When eating out, you usually…", options: ["Try new restaurants and cuisines", "Go to places you already like", "Ask others to choose", "Pick something quick and easy"] },
+      { q: "If you have a free evening, you'd most likely…", options: ["Go out somewhere", "Meet a friend", "Watch something or relax", "Do a hobby alone"] },
+      { q: "When making decisions…", options: ["Think things through carefully", "Discuss with others", "Go with instinct", "Decide quickly"] },
+      { q: "Your energy level in social situations is…", options: ["Very outgoing", "Friendly but balanced", "Slightly reserved", "Very introverted"] },
+      { q: "When trying something new…", options: ["Very excited", "Open but cautious", "Prefer familiar things", "Usually avoid it"] },
+      { q: "Food preferences when going out…", options: ["Fine dining or new cuisines", "Casual restaurants", "Street food or quick bites", "Whatever is easiest"] },
+      { q: "When watching movies together…", options: ["Deep or meaningful movies", "Comedy or feel-good movies", "Action/adventure", "Light background movies"] },
+      { q: "When taking photos…", options: ["Love capturing moments", "Few good photos are enough", "Only occasionally", "Rarely take photos"] },
+      { q: "When spending time together, you enjoy…", options: ["Long conversations", "Shared activities", "Just relaxing together", "Quiet companionship"] },
+      { q: "When trying a new hobby together…", options: ["I get very enthusiastic", "I enjoy learning gradually", "I try it but casually", "I prefer watching first"] }
+    ];
+
+    let aAnswers = [];
+    let bAnswers = [];
+    let currentA = 0;
+    let currentB = 0;
+    let selectedA = null;
+    let selectedB = null;
+
+    function startCompat() {
+      document.getElementById("intro-section").classList.add("hidden");
+      document.getElementById("person-a-section").classList.remove("hidden");
+      renderA();
+    }
+
+    function renderQuestion(qIdx, person, answers) {
+      const q = COMPAT_QUESTIONS[qIdx];
+      const total = COMPAT_QUESTIONS.length;
+      const pct = Math.round((qIdx / total) * 100);
+      const p = person;
+
+      document.getElementById(`${p}-q-label`).textContent = `Question ${qIdx + 1} of ${total}`;
+      document.getElementById(`${p}-q-pct`).textContent = pct + "%";
+      document.getElementById(`${p}-progress-fill`).style.width = pct + "%";
+      document.getElementById(`${p}-question-num`).textContent = "QUESTION " + String(qIdx + 1).padStart(2, "0");
+      document.getElementById(`${p}-question-text`).textContent = q.q;
+
+      const selected = answers[qIdx] !== undefined ? answers[qIdx] : null;
+
+      const optList = document.getElementById(`${p}-options-list`);
+      optList.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        const isA = p === "a";
+        btn.className = "option-btn" + (selected === i ? " selected" : "");
+        if (selected === i) {
+          btn.style.borderColor = isA ? "#2563eb" : "var(--red)";
+          btn.style.background = isA ? "#eef6ff" : "var(--red-soft)";
+          btn.style.color = isA ? "#2563eb" : "var(--red)";
+        }
+        btn.innerHTML = `<span class="option-letter">${["A","B","C","D"][i]}</span>${opt}`;
+        btn.onclick = () => {
+          if (p === "a") { selectedA = i; aAnswers[qIdx] = i; }
+          else { selectedB = i; bAnswers[qIdx] = i; }
+          document.querySelectorAll(`#${p}-options-list .option-btn`).forEach((b, j) => {
+            b.classList.toggle("selected", j === i);
+            b.style.borderColor = j === i ? (isA ? "#2563eb" : "var(--red)") : "";
+            b.style.background = j === i ? (isA ? "#eef6ff" : "var(--red-soft)") : "";
+            b.style.color = j === i ? (isA ? "#2563eb" : "var(--red)") : "";
+          });
+          document.getElementById(`${p}-btn-next`).disabled = false;
+        };
+        optList.appendChild(btn);
+      });
+
+      document.getElementById(`${p}-btn-prev`).style.visibility = qIdx === 0 ? "hidden" : "visible";
+      document.getElementById(`${p}-btn-next`).disabled = selected === null;
+
+      const isLast = qIdx === total - 1;
+      if (p === "a") document.getElementById("a-btn-next").textContent = isLast ? "Person A Done ✓" : "Next →";
+      else document.getElementById("b-btn-next").textContent = isLast ? "See Compatibility ✨" : "Next →";
+    }
+
+    function renderA() { selectedA = null; renderQuestion(currentA, "a", aAnswers); }
+    function renderB() { selectedB = null; renderQuestion(currentB, "b", bAnswers); }
+
+    function nextA() {
+      if (selectedA === null && aAnswers[currentA] === undefined) return;
+      if (currentA < COMPAT_QUESTIONS.length - 1) { currentA++; renderA(); }
+      else {
+        document.getElementById("person-a-section").classList.add("hidden");
+        document.getElementById("person-b-section").classList.remove("hidden");
+        renderB();
+      }
+    }
+
+    function prevA() { if (currentA > 0) { currentA--; renderA(); } }
+
+    function nextB() {
+      if (selectedB === null && bAnswers[currentB] === undefined) return;
+      if (currentB < COMPAT_QUESTIONS.length - 1) { currentB++; renderB(); }
+      else { showCompatResult(); }
+    }
+
+    function prevB() { if (currentB > 0) { currentB--; renderB(); } }
+
+    function showCompatResult() {
+      const total = COMPAT_QUESTIONS.length;
+      let points = 0;
+      let maxPoints = total * 3;
+      let exact = 0, close = 0, diff = 0;
+
+      aAnswers.forEach((a, i) => {
+        const b = bAnswers[i];
+        const dist = Math.abs(a - b);
+        if (dist === 0) { points += 3; exact++; }
+        else if (dist === 1) { points += 2; close++; }
+        else if (dist === 2) { points += 1; close++; }
+        else { diff++; }
+      });
+
+      const pct = Math.round((points / maxPoints) * 100);
+
+      let emoji, title, desc;
+      if (pct >= 80) {
+        emoji = "💚"; title = "Highly Compatible!";
+        desc = "You two are clearly very aligned in how you enjoy life. Your shared preferences for socializing, activities, and spending time create a natural foundation. Keep exploring the world together — you make a great team.";
+      } else if (pct >= 60) {
+        emoji = "🌿"; title = "Good Compatibility";
+        desc = "You have strong overlap in many areas, with a few natural differences that can actually keep things interesting. Your connection has a healthy balance of shared ground and unique perspectives.";
+      } else if (pct >= 40) {
+        emoji = "⚖️"; title = "Moderate Compatibility";
+        desc = "You have some meaningful similarities but also real differences in lifestyle preferences. This isn't bad — opposites can complement each other. Just be open about what each of you needs and find the middle ground.";
+      } else {
+        emoji = "🚩"; title = "Low Compatibility";
+        desc = "Your lifestyle preferences are quite different in many areas. That doesn't mean it won't work, but it does mean you'll need more intentional effort to bridge those gaps. Honest conversations about needs and expectations will be key.";
+      }
+
+      document.getElementById("compat-emoji").textContent = emoji;
+      document.getElementById("compat-score").textContent = pct + "%";
+      document.getElementById("compat-title").textContent = title;
+      document.getElementById("compat-subtitle").textContent = `Compatibility score based on ${total} lifestyle questions`;
+      document.getElementById("compat-desc").textContent = desc;
+
+      setTimeout(() => {
+        document.getElementById("bar-exact").style.width = (exact / total * 100) + "%";
+        document.getElementById("bar-close").style.width = (close / total * 100) + "%";
+        document.getElementById("bar-diff").style.width = (diff / total * 100) + "%";
+        document.getElementById("cnt-exact").textContent = exact;
+        document.getElementById("cnt-close").textContent = close;
+        document.getElementById("cnt-diff").textContent = diff;
+      }, 200);
+
+      document.getElementById("person-b-section").classList.add("hidden");
+      document.getElementById("compat-result-section").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+
+    function retakeCompat() {
+      aAnswers = []; bAnswers = [];
+      currentA = 0; currentB = 0;
+      selectedA = null; selectedB = null;
+      document.getElementById("compat-result-section").classList.add("hidden");
+      document.getElementById("intro-section").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+  </script>
+</body>
+</html>
